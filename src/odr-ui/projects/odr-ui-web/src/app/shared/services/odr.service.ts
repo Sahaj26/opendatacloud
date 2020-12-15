@@ -28,6 +28,7 @@ import { CreateDeployment } from '../types/create-deployment.type';
 import { GeneralIssue } from '../types/general-issue.type';
 import { forOwn } from 'lodash';
 import { CurrentUserDetails } from '../types';
+import { RegistrationInfo } from '../types/registration-info.type';
 
 interface SasTokenDetails {
   token: string;
@@ -179,10 +180,25 @@ export class OdrService implements OnDestroy {
     }
 
     /**
-     * Gets the acceptance status of the license for the dataset.
+     * Sets the acceptance status of the registration for the dataset.
+     */
+    public setDatasetRegistrationDetails(datasetId: string, payload: RegistrationInfo): Observable<string> {
+        return this.http.post<string>(`${this.baseUrl}user/accept-registration/${datasetId}`, payload);
+    }
+
+    /**
+     * Checks the registration is complete for the dataset.
      */
     public getDatasetLicenseStatus(datasetId: string): Observable<boolean> {
         return this.http.get<boolean>(`${this.baseUrl}user/get-license/${datasetId}`);
+    }
+
+    public getFilledDetails(): Observable<RegistrationInfo> {
+        return this.http.get<RegistrationInfo>(`${this.baseUrl}user/get-details`);
+    }
+
+    public getClientIP(): Observable<string> {
+        return this.http.get<string>(`${this.baseUrl}user/get-client-ip`);
     }
 
     /**

@@ -207,5 +207,14 @@ namespace Msr.Odr.Model.Datasets
         /// </summary>
         [JsonProperty("datasetOwners")]
         public ICollection<DatasetOwner> DatasetOwners { get; set; }
+
+        [JsonProperty("containerName")]
+        public string ContainerName { get; set; }
+
+        [JsonProperty("accountName")]
+        public string AccountName { get; set; }
+
+        [JsonProperty("blobName")]
+        public string BlobName { get; set; }
     }
 }

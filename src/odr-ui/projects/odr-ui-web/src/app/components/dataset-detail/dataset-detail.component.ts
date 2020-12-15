@@ -14,6 +14,8 @@ import { tap, catchError } from 'rxjs/operators';
 import { AuthService } from '../../shared/services';
 import { ExportActionType } from '../../shared/types/export-action-type.enum';
 import { ModalDialogService } from 'odr-ui-shared';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { RegistrationInfo } from '../../shared/types/registration-info.type';
 
 interface OnUserAcceptedLicenseArgs {
     datasetId: string;
@@ -30,6 +32,11 @@ export class DatasetDetailComponent implements OnInit, OnDestroy {
     @Input() isAuthenticated: boolean;
     @Input() acceptedLicense: boolean;
     @Input() dataset: Dataset;
+    @Input() ip: string;
+    @Input() city: string;
+    @Input() state: string;
+    @Input() country: string;
+    @Input() oldRegistrationInfo: RegistrationInfo;
     @Output() onUserAcceptedLicense: EventEmitter<OnUserAcceptedLicenseArgs> = new EventEmitter();
     @ViewChild('downloadLink', {static: false}) private downloadLink: ElementRef;
 
@@ -48,6 +55,12 @@ export class DatasetDetailComponent implements OnInit, OnDestroy {
     ExportActionType = ExportActionType;
     currentAction: ExportActionType = ExportActionType.None;
     deployParams: any = null;
+    showRegistrationForm: boolean=false;
+    showAgreementForm:boolean=false;
+    registrationForm:FormGroup;
+    orgTypes:string[]=["Academic/University","Government","Healthcare","For-profit Industry","Non-profit","Other"];
+    nullValue: string="default";
+    registrationInfo: RegistrationInfo;
 
     constructor(
         private router: Router,
@@ -73,6 +86,35 @@ export class DatasetDetailComponent implements OnInit, OnDestroy {
                 )
                 .subscribe();
         }, 0);
+
+        if(this.oldRegistrationInfo==null){
+            this.oldRegistrationInfo=new RegistrationInfo();
+        }
+        else{
+            this.city=this.oldRegistrationInfo.city;
+            this.state=this.oldRegistrationInfo.state;
+            this.country=this.oldRegistrationInfo.country;
+        }
+
+        this.registrationForm=new FormGroup({
+            firstName: new FormControl(this.oldRegistrationInfo.firstName,Validators.required),
+            lastName: new FormControl(this.oldRegistrationInfo.lastName,Validators.required),
+            schoolOrg: new FormControl(this.oldRegistrationInfo.schoolOrg,Validators.required),
+            organizationType: new FormControl(this.oldRegistrationInfo.organizationType,Validators.required),
+            department: new FormControl(this.oldRegistrationInfo.department,Validators.required),
+            roleTitle: new FormControl(this.oldRegistrationInfo.roleTitle,Validators.required),
+            emailAddress: new FormControl(this.oldRegistrationInfo.emailAddress,[Validators.required,Validators.email]),
+            phoneNumber: new FormControl(this.oldRegistrationInfo.phoneNumber,Validators.required),
+            physicalAddress: new FormControl(this.oldRegistrationInfo.physicalAddress,Validators.required),
+            addressLine2: new FormControl(this.oldRegistrationInfo.addressLine2,Validators.required),
+            city: new FormControl(this.city,Validators.required),
+            state: new FormControl(this.state,Validators.required),
+            zip: new FormControl(this.oldRegistrationInfo.zip,Validators.required),
+            country: new FormControl(this.country,Validators.required),
+            agreementOfTerms: new FormControl(true,Validators.requiredTrue),
+            ip: new FormControl(this.ip)
+        });
+
     }
 
     public ngOnDestroy() {
@@ -209,11 +251,54 @@ export class DatasetDetailComponent implements OnInit, OnDestroy {
         }
 
         if (!this.acceptedLicense) {
-            this.openLicense();
+            // this.openLicense();
+            this.showRegistrationForm=true;
             return false;
         }
 
         return true;
+    }
+
+    public closeRegistrationForm():void{
+        this.showRegistrationForm=false;
+    }
+
+    public showAgreement():void{
+        this.showAgreementForm=true;
+    }
+
+    public closeAgreementForm():void{
+        this.showAgreementForm=false;
+    }
+
+    public onRegistrationSubmit():void{
+        this.registrationInfo = new RegistrationInfo();
+        this.registrationInfo.firstName=this.registrationForm.value["firstName"];
+        this.registrationInfo.lastName=this.registrationForm.value["lastName"];
+        this.registrationInfo.schoolOrg=this.registrationForm.value["schoolOrg"];
+        this.registrationInfo.organizationType=this.registrationForm.value["organizationType"];
+        this.registrationInfo.department=this.registrationForm.value["department"];
+        this.registrationInfo.roleTitle=this.registrationForm.value["roleTitle"];
+        this.registrationInfo.emailAddress=this.registrationForm.value["emailAddress"];
+        this.registrationInfo.phoneNumber=this.registrationForm.value["phoneNumber"];
+        this.registrationInfo.physicalAddress=this.registrationForm.value["physicalAddress"];
+        this.registrationInfo.addressLine2=this.registrationForm.value["addressLine2"];
+        this.registrationInfo.city=this.registrationForm.value["city"];
+        this.registrationInfo.state=this.registrationForm.value["state"];
+        this.registrationInfo.zip=this.registrationForm.value["zip"];
+        this.registrationInfo.country=this.registrationForm.value["country"];
+        this.registrationInfo.agreementOfTerms=this.registrationForm.value["agreementOfTerms"];
+        this.registrationInfo.ip=this.registrationForm.value["ip"];
+        this.odrService.setDatasetRegistrationDetails(this.dataset.id,this.registrationInfo).subscribe(
+            (data:any)=>{
+                if(data!=null){
+                    this.acceptedLicense=true;
+                    this.showAgreementForm=false;
+                    this.showRegistrationForm=false;
+                }
+            }
+        );
+        this.processAction();
     }
 
     private deployDataset() {

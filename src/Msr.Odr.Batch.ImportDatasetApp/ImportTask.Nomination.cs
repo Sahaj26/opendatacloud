@@ -30,6 +30,9 @@ namespace Msr.Odr.Batch.ImportDatasetApp
 
             var storage =
                 await UserDataStorage.GetDatasetImportPropertiesForNomination(nominationId, cancellationToken);
+
+            Log.Add($"DatasetName: {storage.DatasetName}");
+
             if (storage == null)
             {
                 throw new InvalidOperationException("Nomination storage details were not found.");

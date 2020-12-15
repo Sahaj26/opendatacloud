@@ -198,6 +198,11 @@ namespace Msr.Odr.Model
         /// </summary>
         public string OtherLicenseName { get; set; }
 
+        public string AccountName { get; set; } = "";
+
+        public string ContainerName { get; set; } = "";
+
+        public string BlobName { get; set; } = "";
         /// <summary>
         /// The approval status for the nominated dataset
         /// </summary>

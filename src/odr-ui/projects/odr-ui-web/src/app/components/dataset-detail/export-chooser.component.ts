@@ -66,6 +66,8 @@ export class ExportChooserComponent {
     deploymentId: string = deploymentTypes[0].deploymentId;
     areDeployOptionsVisible = false;
 
+    viewModal: boolean = false;
+
     constructor(
         private authService: AuthService
     ) { }

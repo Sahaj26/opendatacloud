@@ -236,5 +236,14 @@ namespace Msr.Odr.Model.UserData
         /// </summary>
         [JsonProperty("otherLicenseFileName")]
         public string OtherLicenseFileName { get; set; }
+
+        [JsonProperty("accountName")]
+        public string AccountName { get; set; } = "";
+
+        [JsonProperty("containerName")]
+        public string ContainerName { get; set; } = "";
+
+        [JsonProperty("blobName")]
+        public string BlobName { get; set; } = "";
     }
 }

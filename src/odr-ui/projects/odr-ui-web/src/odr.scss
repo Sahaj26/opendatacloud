@@ -117,17 +117,20 @@ a, button {
   font-size: 1em;
   padding: 0;
   border: 0;
-  color: #0D6AB6;
+  // color: #0D6AB6;
+  color: #8c191d;
   text-decoration: underline;
 
   &:hover {
-    color: #005da6;
+    // color: #005da6;
+    color: #590003;
   }
 }
 
 .button {
   -webkit-appearance: none;
-  background: #0D6AB6;
+  // background: #0D6AB6;
+  background: #8c191d;
   border: 1px solid transparent;
   border-radius: none;
   color: #fff;
@@ -140,7 +143,8 @@ a, button {
 
   &:hover,
   &:focus {
-    background: #005da6;
+    // background: #005da6;
+    background: #590003;
     color: #fff;
   }
 
@@ -155,14 +159,16 @@ a, button {
 }
 
 a {
-  color: #0D6AB6;
+  // color: #0D6AB6;
+  color: #8c191d;
   text-decoration: underline;
   display: inline-block;
   cursor: pointer;
 
   &:hover,
   &:focus {
-    color: #005da6;
+    // color: #005da6;
+    color: #590003;
 
     span {
       text-decoration: underline;
@@ -173,13 +179,15 @@ a {
 
 .call-to-action {
   margin-top: 1em;
-  color: #0D6AB6;
+  // color: #0D6AB6;
+  color: #8c191d;
   text-decoration: none;
   display: inline-block;
   cursor: pointer;
 
   &:hover {
-    color: #005da6;
+    // color: #005da6;
+    color: #590003;
 
     span {
       text-decoration: underline;
@@ -294,8 +302,10 @@ h4 {
   max-width: 90ch;
 
   a {
-    color: #0D6AB6;
+    // color: #0D6AB6;
+    color: #8c191d;
   }
+  
 
   dl {
 
@@ -668,7 +678,8 @@ $modal-sm:                      300px !default;
 
       &:hover,
       &:focus {
-          background: #0D6AB6;
+          // background: #0D6AB6;
+          background: #8c191d;
           color: #fff;
       }
 
@@ -803,7 +814,8 @@ input[type="radio"] {
 
   a {
       display: inline-block;
-      color: #0D6AB6;
+      // color: #0D6AB6;
+      color: #8c191d;
       margin-right: 2em;
       text-decoration: none;
   }

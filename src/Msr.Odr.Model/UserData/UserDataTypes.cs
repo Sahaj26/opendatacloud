@@ -50,5 +50,11 @@ namespace Msr.Odr.Model.UserData
         /// </summary>
         [EnumMember(Value = "dataset-edit")]
         DatasetEdit = 6,
+
+        /// <summary>
+        /// Last Registration.
+        /// </summary>
+        [EnumMember(Value = "last-registration")]
+        LastRegistration = 7,
     }
 }

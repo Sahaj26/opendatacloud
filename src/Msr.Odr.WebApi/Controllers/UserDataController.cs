@@ -95,5 +95,53 @@ namespace Msr.Odr.Api.Controllers
             var isLicenseAccepted = await this.Storage.GetLicenseStatusAsync(datasetId, this.User, cancellationToken).ConfigureAwait(false);
             return Ok(isLicenseAccepted);
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("get-details")]
+        [SwaggerOperation(OperationId = "User_GetDetails")]
+        [Produces(contentType: "application/json")]
+        [SwaggerResponse((int)HttpStatusCode.OK, Description = "Gets the old filled details")]
+        public async Task<IActionResult> GetLicense(CancellationToken cancellationToken)
+        {
+            var info = await this.Storage.GetRegistrationDetailsAsync(this.User, cancellationToken).ConfigureAwait(false);
+            return Ok(info);
+        }
+
+        [HttpGet("get-client-ip")]
+        [SwaggerOperation(OperationId = "User_GetIP")]
+        [Produces(contentType: "application/json")]
+        [SwaggerResponse((int)HttpStatusCode.OK, Description = "Gets")]
+        public IActionResult GetClientIP(CancellationToken cancellationToken)
+        {
+            var ip = HttpContext.Connection.RemoteIpAddress.ToString();
+            //var info = await this.Storage.GetRegistrationDetailsAsync(this.User, cancellationToken).ConfigureAwait(false);
+            return Ok(ip);
+        }
+
+        /// <summary>
+        /// Accepts the registration Info on the specified dataset
+        /// </summary>
+        /// <param name="id">The dataset identifier.</param>
+        /// <param name="RegistrationInfo">Registration Info Seperated.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The results of the request</returns>
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("accept-registration/{id:guid}")]
+        [SwaggerOperation(OperationId = "User_AcceptRegistration")]
+        [Consumes(contentType: "application/json")]
+        [Produces(contentType: "application/json")]
+        [SwaggerResponse((int)HttpStatusCode.OK, Type = typeof(Uri), Description = "Accepted the registration details for the dataset")]
+        [SwaggerResponse((int)HttpStatusCode.NotFound, Description = "Dataset not found")]
+        [SwaggerResponse((int)HttpStatusCode.Unauthorized, Description = "The user is not properly authenticated")]
+        public async Task<IActionResult> AcceptRegistration([FromRoute] Guid id, [FromBody] RegistrationInfo info, CancellationToken cancellationToken)
+        {
+            var currentLicenseId = await this.Storage.AcceptRegistrationInfoAsync(id, this.User, info, cancellationToken).ConfigureAwait(false);
+            if (currentLicenseId == null)
+            {
+                return this.NotFound();
+            }
+
+            return this.Ok(currentLicenseId);
+        }
     }
 }

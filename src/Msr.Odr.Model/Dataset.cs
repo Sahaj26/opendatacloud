@@ -179,5 +179,11 @@ namespace Msr.Odr.Model
         /// Owners of dataset, if applicable.
         /// </summary>
         public ICollection<DatasetOwner> DatasetOwners { get; set; }
-	}
+
+        public string ContainerName { get; set; } = "";
+
+        public string AccountName { get; set; } = "";
+
+        public string BlobName { get; set; } = "";
+    }
 }

@@ -105,7 +105,7 @@
             </button>
           </div>
         </div>
-        <div
+        <!-- <div
           class="search-facet search-facet-licenses"
           *ngIf="selectedFacetLicense"
         >
@@ -121,7 +121,7 @@
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-        </div>
+        </div> -->
         <div *ngIf="hasSelectedFacets">
           <button class="link" (click)="clearFacets()" tabindex="90">
             Clear filters
@@ -184,7 +184,7 @@
                 </span>
               </div>
               <div class="dataset-file-license">
-                <strong>License: </strong>{{ result.licenseName }}
+                <strong>License: </strong>Stanford University Dataset Research Use Agreement<!-- {{ result.licenseName }} -->
               </div>
             </div>
 
@@ -253,13 +253,13 @@
         (selectFormat)="selectFormat($event)"
       ></app-search-formats>
 
-      <app-search-licenses
+      <!-- <app-search-licenses
         #searchLicenses
         [isCollapsed]="isLicensesCollapsed"
         [tabindex]="50"
         (toggleCollapsed)="toggleLicensesCollapsed()"
         (selectLicense)="selectLicense($event)"
-      ></app-search-licenses>
+      ></app-search-licenses> -->
     </div>
   </div>
   <!--Search Sidebar END-->

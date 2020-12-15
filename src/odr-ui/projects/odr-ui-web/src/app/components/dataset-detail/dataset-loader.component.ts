@@ -2,12 +2,15 @@
 // Licensed under the MIT License.
 
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable, of, Subject } from 'rxjs';
 import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { AuthService, DatasetSchemaService, DatasetService, OdrService } from '../../shared/services';
+import { ResolveIpService } from '../../shared/services/resolve-ip.service';
+import { ReverseGeocodingService } from '../../shared/services/reverse-geocoding.service';
 import { Dataset } from '../../shared/types/dataset.type';
+import { RegistrationInfo } from '../../shared/types/registration-info.type';
 
 interface DatasetLicenseUserDetails {
     dataset: Dataset;
@@ -19,11 +22,18 @@ interface DatasetLicenseUserDetails {
     selector: 'app-dataset-loader',
     templateUrl: './dataset-loader.component.html',
 })
-export class DatasetLoaderComponent implements OnDestroy {
+export class DatasetLoaderComponent implements OnDestroy,OnInit {
 
     public isLoading = true;
     public notFound = false;
     public datasetDetails: Observable<DatasetLicenseUserDetails>;
+    isRegistered:boolean=false;
+    datasetId:string;
+    oldInfo:RegistrationInfo;
+    ip: string="";
+    city: string="";
+    state: string="";
+    country: string="";
 
     private refreshSubject: Subject<boolean> = new BehaviorSubject(true);
 
@@ -32,7 +42,9 @@ export class DatasetLoaderComponent implements OnDestroy {
         private authService: AuthService,
         private datasetService: DatasetService,
         private datasetSchemaService: DatasetSchemaService,
-        private odrService: OdrService) {
+        private odrService: OdrService,
+        private resolveIp: ResolveIpService,
+        private revGeoCoding: ReverseGeocodingService) {
 
         const refreshStream = this.refreshSubject.asObservable();
 
@@ -84,6 +96,53 @@ export class DatasetLoaderComponent implements OnDestroy {
         // .do((x) => {
         //     console.log(JSON.stringify(x, null, 2));
         // });
+    }
+
+    ngOnInit(): void{
+        this.route.params
+            .pipe(
+                map((params: Params) => params['id'])
+            )
+            .subscribe((data:any)=>{
+                this.datasetId=data;
+            });
+        this.odrService.getDatasetLicenseStatus(this.datasetId).subscribe(
+            (data:boolean)=>{
+                this.isRegistered=data;
+            });
+        this.fetchIp();
+        this.getLoc();
+        this.odrService.getFilledDetails().subscribe(
+            (data:any)=>{
+                this.oldInfo=data;
+            }
+        );
+    }
+
+    fetchIp():void{
+        this.resolveIp.getIp().subscribe((data:any)=>{
+            this.ip=data;
+        });
+    }
+
+    getLoc():void {
+        if(navigator.geolocation){
+          navigator.geolocation.getCurrentPosition(position =>
+            {
+              this.revGeoCoding.get(position.coords.latitude,position.coords.longitude).subscribe((data:any)=>{
+                this.city=data["city"];
+                if(!(this.getLength(data["city"])==0)) { this.city+=", "; }
+                this.city+=data["locality"];
+                this.state=data["principalSubdivision"];
+                this.country=data["countryName"];
+              });
+            }
+          );
+        }
+    }
+
+    private getLength(string:String): number{
+        return string.length;
     }
 
     ngOnDestroy(): void {

@@ -16,7 +16,8 @@
                 </div>
                 <div class="dataset-file-license" *ngIf="dataset.licenseName">
                     <strong>License: </strong>
-                    <button class="btn btn-link" (click)="openLicense()">{{dataset.licenseName}}</button>
+                    <!-- <button class="btn btn-link" (click)="openLicense()">{{dataset.licenseName}}</button> -->
+                    <button class="btn btn-link" (click)="showAgreement()">Stanford University Dataset Research Use Agreement</button>
                     <br />
                     <div *ngIf="isAuthenticated && acceptedLicense">
                         <svg class="icon"><use xlink:href="#icon-check"></use></svg>
@@ -84,5 +85,411 @@
               <span>Edit this Dataset</span>
             </a>
         </p>
+    </div>
+</div>
+<div *ngIf="showRegistrationForm">
+    <div
+    style="
+        display: block;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        left: 0px;
+        top: 0px;
+        background-color: black;
+        opacity: 0.5;"
+        (click)="closeRegistrationForm()">
+    </div>
+    <div class="desktopScreen">
+        <div 
+        style="
+            display: block;
+            position: fixed;
+            width: 60%;
+            left: 20%;
+            top: 1%;
+            height: auto;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 5px 5px 15px;
+            max-height: 98%;
+            overflow-y: auto">
+            <h3 style="text-align: center; margin: 15px;">Register for {{dataset.name}}</h3>
+            <hr style="margin-bottom: 0px;">
+            <form [formGroup]="registrationForm" (ngSubmit)="onRegistrationSubmit()">
+                <div style="width: 95%; margin: auto;">
+                    <table style="width: 100%; border-spacing:0 12.5px; margin-top: -10px;">
+                        <tr>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="6" style="padding: 0 1%;">
+                                <label for="fname">First Name *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="fname" placeholder="Enter First Name" formControlName="firstName"/>
+                            </td>
+                            <td colspan="6" style="padding: 0 1%;">
+                                <label for="lname">Last Name *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="lname" placeholder="Enter Last Name" formControlName="lastName"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="6" style="padding: 0 1%;">
+                                <label for="org">School/Organization *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="org" placeholder="Enter School/Organization Name" formControlName="schoolOrg"/>
+                            </td>
+                            <td colspan="6" style="padding: 0 1%;">
+                                <label for="orgType">Organization Type *</label>
+                                <select class="form-control" id="orgType" style="border: 1px solid #A9A9A9;" name="organizationType" [(ngModel)]="nullValue" formControlName="organizationType">
+                                    <option disabled value="{{nullValue}}">- Select Organization Type -</option>
+                                    <option *ngFor="let orgType of orgTypes" [ngValue]="orgType">
+                                      {{orgType}}
+                                  </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="6" style="padding: 0 1%;">
+                                <label for="department">Department *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="department" placeholder="Enter Department Name" formControlName="department"/>
+                            </td>
+                            <td colspan="6" style="padding: 0 1%;">
+                                <label for="role">Role/Title *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="role" placeholder="Enter Role/Title Name" formControlName="roleTitle"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="6" style="padding: 0 1%;">
+                                <label for="email">Email Address *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="email" placeholder="Enter Email Address" formControlName="emailAddress"/>
+                            </td>
+                            <td colspan="6" style="padding: 0 1%;">
+                                <label for="phone">Phone Number *</label>
+                                <input type="number" style="width: 100%; border: 1px solid #A9A9A9;" id="phone" placeholder="Enter phoneNumber" formControlName="phoneNumber"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="6" style="padding: 0 1%;">
+                                <label for="address">Physical Address *</label>
+                                <textarea rows="4" cols="50" style="width: 100%; border: 1px solid #A9A9A9; resize: none; text-align: left; font-family: 'SegoeUI';" id="address" placeholder="Enter Physical Address" formControlName="physicalAddress"></textarea>
+                            </td>
+                            <td colspan="6" style="padding: 0 1%;">
+                                <label for="addressLine2">Address Line 2 *</label>
+                                <!-- <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="addressLine2" placeholder="Enter Adress Line 2" formControlName="addressLine2"/> -->
+                                <textarea rows="4" cols="50" style="width: 100%; border: 1px solid #A9A9A9;  resize: none; text-align: left; font-family: 'SegoeUI';" id="addressLine2" placeholder="Enter Adress Line 2" formControlName="addressLine2"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="6" style="padding: 0 1%;">
+                                <label for="city">City *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="city" placeholder="Enter City Name" formControlName="city"/>
+                            </td>
+                            <td colspan="6" style="padding: 0 1%;">
+                                <label for="state">State/Province/Region *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="state" placeholder="Enter State/Province/Region Name" formControlName="state"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="6" style="padding: 0 1%;">
+                                <label for="zip">Postal Zip Code *</label>
+                                <input type="number" style="width: 100%; border: 1px solid #A9A9A9;" id="zip" placeholder="Enter Postsal/Zip Code" formControlName="zip"/>
+                            </td>
+                            <td colspan="6" style="padding: 0 1%;">
+                                <label for="country">Country *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="country" placeholder="Enter Country Name" formControlName="country"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <input type="checkbox" id="agreementOfTerms" name="agreementOfTerms" formControlName="agreementOfTerms"/>
+                                <label for="agreementOfTerms" style="display: inline;"><a (click)="showAgreement()">Agreement Of Terms</a></label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <hr style="margin-bottom: 0px;">
+                <div>
+                    <div style="padding: 10px; text-align: right;">
+                        <span>* - Required</span>
+                    </div>
+                    <div style="padding: 10px; text-align: right;">
+                        <button (click)="closeRegistrationForm()"
+                        style="
+                            background-color: #e7e7e7;
+                            border: none;
+                            color: black;
+                            padding: 9px 19px;
+                            text-align: center;
+                            text-decoration: none;
+                            display: inline-block;
+                            font-size: 14px;
+                            cursor: pointer;
+                            margin: 0px 5px;"
+                        >Close</button>
+                        <button
+                        style="
+                            border: none;
+                            color: white;
+                            padding: 9px 19px;
+                            text-align: center;
+                            text-decoration: none;
+                            display: inline-block;
+                            font-size: 14px;
+                            cursor: pointer;
+                            margin: 0px 5px;"
+                            [style.background-color]="registrationForm.invalid ? '#808080' : '#8c191d'"
+                            [disabled]="registrationForm.invalid"
+                        >Submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="mobileScreen">
+        <div 
+        style="
+            display: block;
+            position: fixed;
+            width: 80%;
+            left: 10%;
+            top: 1%;
+            height: auto;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 5px 5px 15px;
+            max-height: 98%;
+            overflow-y: auto">
+            <h3 style="text-align: center; margin: 15px;">Register for {{dataset.name}}</h3>
+            <hr style="margin-bottom: 0px;">
+            <form [formGroup]="registrationForm" (ngSubmit)="onRegistrationSubmit()">
+                <div style="width: 95%; margin: auto;">
+                    <table style="width: 100%; border-spacing:0 12.5px; margin-top: -10px;">
+                        <tr>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                            <td style="width: 8.33%;"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <label for="fname">First Name *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="fname" placeholder="Enter First Name" formControlName="firstName"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <label for="lname">Last Name *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="lname" placeholder="Enter Last Name" formControlName="lastName"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <label for="org">School/Organization *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="org" placeholder="Enter School/Organization Name" formControlName="schoolOrg"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <label for="orgType">Organization Type *</label>
+                                <select class="form-control" id="orgType" style="border: 1px solid #A9A9A9;" name="organizationType" [(ngModel)]="nullValue" formControlName="organizationType">
+                                    <option disabled value="{{nullValue}}">- Select Organization Type -</option>
+                                    <option *ngFor="let orgType of orgTypes" [ngValue]="orgType">
+                                      {{orgType}}
+                                  </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <label for="department">Department *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="department" placeholder="Enter Department Name" formControlName="department"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <label for="role">Role/Title *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="role" placeholder="Enter Role/Title Name" formControlName="roleTitle"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <label for="email">Email Address *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="email" placeholder="Enter Email Address" formControlName="emailAddress"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <label for="phone">Phone Number *</label>
+                                <input type="number" style="width: 100%; border: 1px solid #A9A9A9;" id="phone" placeholder="Enter phoneNumber" formControlName="phoneNumber"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <label for="address">Physical Address *</label>
+                                <textarea rows="4" cols="50" style="width: 100%; border: 1px solid #A9A9A9; resize: none; text-align: left; font-family: 'SegoeUI';" id="address" placeholder="Enter Physical Address" formControlName="physicalAddress"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <label for="addressLine2">Address Line 2 *</label>
+                                <!-- <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="addressLine2" placeholder="Enter Adress Line 2" formControlName="addressLine2"/> -->
+                                <textarea rows="4" cols="50" style="width: 100%; border: 1px solid #A9A9A9;  resize: none; text-align: left; font-family: 'SegoeUI';" id="addressLine2" placeholder="Enter Adress Line 2" formControlName="addressLine2"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <label for="city">City *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="city" placeholder="Enter City Name" formControlName="city"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <label for="state">State/Province/Region *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="state" placeholder="Enter State/Province/Region Name" formControlName="state"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <label for="zip">Postal Zip Code *</label>
+                                <input type="number" style="width: 100%; border: 1px solid #A9A9A9;" id="zip" placeholder="Enter Postsal/Zip Code" formControlName="zip"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <label for="country">Country *</label>
+                                <input type="text" style="width: 100%; border: 1px solid #A9A9A9;" id="country" placeholder="Enter Country Name" formControlName="country"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="12" style="padding: 0 1%;">
+                                <input type="checkbox" id="agreementOfTerms" name="agreementOfTerms" formControlName="agreementOfTerms"/>
+                                <label for="agreementOfTerms" style="display: inline;"><a (click)="showAgreement()">Agreement Of Terms</a></label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <hr style="margin-bottom: 0px;">
+                <div>
+                    <div style="padding: 10px; text-align: right;">
+                        <span>* - Required</span>
+                    </div>
+                    <div style="padding: 10px; text-align: right;">
+                        <button (click)="closeRegistrationForm()"
+                        style="
+                            background-color: #e7e7e7;
+                            border: none;
+                            color: black;
+                            padding: 9px 19px;
+                            text-align: center;
+                            text-decoration: none;
+                            display: inline-block;
+                            font-size: 14px;
+                            cursor: pointer;
+                            margin: 0px 5px;"
+                        >Close</button>
+                        <button
+                        style="
+                            border: none;
+                            color: white;
+                            padding: 9px 19px;
+                            text-align: center;
+                            text-decoration: none;
+                            display: inline-block;
+                            font-size: 14px;
+                            cursor: pointer;
+                            margin: 0px 5px;"
+                            [style.background-color]="registrationForm.invalid ? '#808080' : '#8c191d'"
+                            [disabled]="registrationForm.invalid"
+                        >Submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div *ngIf="showAgreementForm">
+    <div
+    style="
+        display: block;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        left: 0px;
+        top: 0px;
+        background-color: black;
+        opacity: 0.5;"
+        (click)="closeAgreementForm()">
+    </div>
+    <div>
+        <div
+        style="
+            display: block;
+            position: fixed;
+            width: 55%;
+            left: 22.5%;
+            top: 5%;
+            height: auto;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 5px 5px 25px;
+            max-height: 90%;
+            overflow-y: auto;">
+            <h5 style="text-align: center; margin: 15px;">
+                STANFORD UNIVERSITY SCHOOL OF MEDICINE {{dataset.name | uppercase}} DATASET RESEARCH USE AGREEMENT
+                <!-- STANFORD UNIVERSITY DATASET RESEARCH USE AGREEMENT -->
+            </h5>
+            <hr style="margin-bottom: 0px;">
+            <div style="width: 95%; margin: auto; padding: 10px;">
+                <p>By registering for downloads from the {{dataset.name}} Dataset, you are agreeing to this Research Use Agreement, as well as to the Terms of Use of the Stanford University School of Medicine website as posted and updated periodically at <a href="http://www.stanford.edu/site/terms/">http://www.stanford.edu/site/terms/</a>.</p>
+                <ol>
+                    <li>Permission is granted to view and use the {{dataset.name}} Dataset without charge for personal, non-commercial research purposes only. Any commercial use, sale, or other monetization is prohibited.</li>
+                    <li>Other than the rights granted herein, the Stanford University School of Medicine (“School of Medicine”) retains all rights, title, and interest in the {{dataset.name}} Dataset.</li>
+                    <li>You may make a verbatim copy of the {{dataset.name}} Dataset for personal, non-commercial research use as permitted in this Research Use Agreement. If another user within your organization wishes to use the {{dataset.name}} Dataset, they must register as an individual user and comply with all the terms of this Research Use Agreement.</li>
+                    <li>YOU MAY NOT DISTRIBUTE, PUBLISH, OR REPRODUCE A COPY of any portion or all of the {{dataset.name}} Dataset to others without specific prior written permission from the School of Medicine.</li>
+                    <li>YOU MAY NOT SHARE THE DOWNLOAD LINK to the {{dataset.name}} dataset to others. If another user within your organization wishes to use the {{dataset.name}} Dataset, they must register as an individual user and comply with all the terms of this Research Use Agreement.</li>
+                    <li>You must not modify, reverse engineer, decompile, or create derivative works from the {{dataset.name}} Dataset. You must not remove or alter any copyright or other proprietary notices in the {{dataset.name}} Dataset.</li>
+                    <li>The {{dataset.name}} Dataset has not been reviewed or approved by the Food and Drug Administration, and is for non-clinical, Research Use Only. In no event shall data or images generated through the use of the {{dataset.name}} Dataset be used or relied upon in the diagnosis or provision of patient care.</li>
+                    <li>THE {{dataset.name | uppercase}} DATASET IS PROVIDED "AS IS," AND STANFORD UNIVERSITY AND ITS COLLABORATORS DO NOT MAKE ANY WARRANTY, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, NOR DO THEY ASSUME ANY LIABILITY OR RESPONSIBILITY FOR THE USE OF THIS {{dataset.name | uppercase}} DATASET.</li>
+                    <li>You will not make any attempt to re-identify any of the individual data subjects. Re-identification of individuals is strictly prohibited. Any re-identification of any individual data subject shall be immediately reported to the School of Medicine.</li>
+                    <li>Any violation of this Research Use Agreement or other impermissible use shall be grounds for immediate termination of use of this {{dataset.name}} Dataset. In the event that the School of Medicine determines that the recipient has violated this Research Use Agreement or other impermissible use has been made, the School of Medicine may direct that the undersigned data recipient immediately return all copies of the {{dataset.name}} Dataset and retain no copies thereof even if you did not cause the violation or impermissible use.</li>
+                </ol>
+                <p>In consideration for your agreement to the terms and conditions contained here, Stanford grants you permission to view and use the {{dataset.name}} Dataset for personal, non-commercial research. You may not otherwise copy, reproduce, retransmit, distribute, publish, commercially exploit or otherwise transfer any material.</p>
+                <p><b>Limitation of Use: </b>You may use {{dataset.name}} Dataset for legal purposes only.</p>
+                <p>You agree to indemnify and hold Stanford harmless from any claims, losses or damages, including legal fees, arising out of or resulting from your use of the {{dataset.name}} Dataset or your violation or role in violation of these Terms. You agree to fully cooperate in Stanford’s defense against any such claims. These Terms shall be governed by and interpreted in accordance with the laws of California.</p>
+            </div>
+            <hr style="margin-bottom: 0px;">
+            <div style="padding: 10px; text-align: right;">
+                <button (click)="closeAgreementForm()"
+                style="
+                    background-color: #e7e7e7;
+                    border: none;
+                    color: black;
+                    padding: 9px 19px;
+                    text-align: center;
+                    text-decoration: none;
+                    display: inline-block;
+                    font-size: 14px;
+                    cursor: pointer;"
+                >Close</button>
+            </div>
+        </div>
     </div>
 </div>

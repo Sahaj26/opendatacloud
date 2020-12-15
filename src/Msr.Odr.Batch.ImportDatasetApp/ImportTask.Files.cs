@@ -23,7 +23,8 @@ namespace Msr.Odr.Batch.ImportDatasetApp
 
         private async Task<(ICollection<string> fileTypes, int fileCount, long fileSize, string containerUri)> CreateDatasetFileDocuments(
             DatasetImportProperties storage,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            Guid NominationId)
         {
             Log.Add("Creating dataset file documents.");
 
@@ -104,7 +105,7 @@ namespace Msr.Odr.Batch.ImportDatasetApp
 
                     var task = Task.Run(async () =>
                     {
-                        await DatasetStorage.CreateFileRecord(result.File, result.Blob).ConfigureAwait(false);
+                        await DatasetStorage.CreateFileRecord(result.File, NominationId, result.Blob).ConfigureAwait(false);
                         concurrencySemaphore.Release();
                         if (Interlocked.Increment(ref totalCount) % 100 == 0)
                         {
@@ -153,7 +154,7 @@ namespace Msr.Odr.Batch.ImportDatasetApp
                     SortKey = GenerateSortKey("0", folder),
                     Modified = DateTimeOffset.UtcNow,
                 };
-                await DatasetStorage.CreateFileRecord(fileItem).ConfigureAwait(false);
+                await DatasetStorage.CreateFileRecord(fileItem,NominationId).ConfigureAwait(false);
             }
             Log.Add($"Loaded {parents.Count} folder records.");
 

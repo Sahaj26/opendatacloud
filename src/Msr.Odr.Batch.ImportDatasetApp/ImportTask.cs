@@ -64,7 +64,7 @@ namespace Msr.Odr.Batch.ImportDatasetApp
 
                 await DeleteDatasetDocuments(cancellationToken);
 
-                var fileDetails = await CreateDatasetFileDocuments(storage, cancellationToken);
+                var fileDetails = await CreateDatasetFileDocuments(storage, cancellationToken,nomination.Id);
 
                 await CreateDatasetDocument(nomination, storage, fileDetails, cancellationToken);
 

@@ -87,17 +87,23 @@ namespace Msr.Odr.Services
 
             try
             {
-                var query = this.Client.CreateDocumentQuery<AcceptedLicenseStorage>(UserDataDocumentCollectionUri, options)
-                                            .Where(f => f.DatasetId == datasetId &&
-                                                        f.UserId == userId &&
-                                                        f.LicenseId == dataset.LicenseId &&
+                //var query = this.Client.CreateDocumentQuery<AcceptedLicenseStorage>(UserDataDocumentCollectionUri, options)
+                //                            .Where(f => f.DatasetId == datasetId &&
+                //                                        f.UserId == userId &&
+                //                                        f.LicenseId == dataset.LicenseId &&
+                //                                        f.DataType == UserDataTypes.AcceptedLicense)
+                //                            .AsDocumentQuery();
+
+                var query = this.Client.CreateDocumentQuery<RegistrationInfo>(UserDataDocumentCollectionUri, options)
+                                            .Where(f => f.DatasetId == datasetId.ToString() &&
+                                                        f.UserID == userId.ToString() &&
                                                         f.DataType == UserDataTypes.AcceptedLicense)
                                             .AsDocumentQuery();
 
-                var acceptedLicenses = await query.ExecuteNextAsync<AcceptedLicenseStorage>(cancellationToken)
+                var info = await query.ExecuteNextAsync<RegistrationInfo>(cancellationToken)
                     .ConfigureAwait(false);
 
-                if (acceptedLicenses.Any())
+                if (info.Any())
                 {
                     return true;
                 }
@@ -108,6 +114,65 @@ namespace Msr.Odr.Services
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Get license status
+        /// </summary>
+        /// <param name="datasetId">The dataset ID</param>
+        /// <param name="user">The user</param>
+        /// <param name="licenseId">The license ID</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<RegistrationInfo> GetRegistrationDetailsAsync(ClaimsPrincipal user, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var userId = GetUserId(user);
+            if (userId == null)
+            {
+                throw new InvalidOperationException("Invalid user id.");
+            }
+
+            try
+            {
+
+                var optionsFeed = new FeedOptions
+                {
+                    PartitionKey = new PartitionKey("ri00bbb6-aaa7-4f78-a0bf-1d0f6759e674")
+                };
+
+                var query1 = this.Client.CreateDocumentQuery<LastRegistration>(UriFactory.CreateDocumentCollectionUri("OpenData", "UserData"), optionsFeed)
+                        .Where(f => f.UserId == userId.Value.ToString())
+                        .AsDocumentQuery();
+
+                var documents = await query1.ExecuteNextAsync<LastRegistration>(cancellationToken)
+                    .ConfigureAwait(false);
+
+                var documentTemp = documents.FirstOrDefault();
+                if (documentTemp != null)
+                {
+                    var options = new FeedOptions
+                    {
+                        PartitionKey = new PartitionKey(documentTemp.ForDataset)
+                    };
+
+                    var query = this.Client.CreateDocumentQuery<RegistrationInfo>(
+                        UriFactory.CreateDocumentCollectionUri("OpenData", "UserData"), options)
+                                            .Where(f => f.Id == documentTemp.RegistrationId)
+                                            .AsDocumentQuery();
+
+                    var info = await query.ExecuteNextAsync<RegistrationInfo>(cancellationToken)
+                        .ConfigureAwait(false);
+
+                    var infoTemp = info.FirstOrDefault();
+                    return infoTemp;
+                }
+            }
+            catch (Exception ex) when (ex.GetType().Name == "NotFoundException")
+            {
+                throw new InvalidOperationException("Not Found Exception");
+            }
+            return null;
         }
 
         public async Task<OtherLicenseFile> GetOtherLicenseFileAsync(Guid nominationId, CancellationToken cancellationToken)
@@ -187,6 +252,140 @@ namespace Msr.Odr.Services
             return doc.LicenseId;
         }
 
+        /// <summary>
+        /// Accepts the Registration info for the specified dataset and returns the newly
+        /// created identifier associated with the dataset.
+        /// </summary>
+        /// <param name="datasetId">The dataset ID</param>
+        /// <param name="user">The user</param>
+        /// <param name="registrationInfo">The registration info</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>returns the newly created identifier associated with the dataset.</returns>
+        public async Task<Guid?> AcceptRegistrationInfoAsync(Guid datasetId, ClaimsPrincipal user, RegistrationInfo info, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var doc = await this.RetrieveDatasetDocument(datasetId, cancellationToken);
+            if (doc == null)
+            {
+                throw new InvalidOperationException("Invalid dataset id.");
+            }
+
+            var userId = GetUserId(user);
+            if (!userId.HasValue)
+            {
+                return null;
+            }
+            var name = GetUserName(user);
+            var email = GetUserEmail(user);
+
+            var options = new RequestOptions
+            {
+                PartitionKey = new PartitionKey(datasetId.ToString())
+            };
+            var uri = this.UserDataDocumentCollectionUri;
+            //var record = new AcceptedLicenseStorage
+            //{
+            //    DatasetId = datasetId,
+            //    LicenseId = doc.LicenseId,
+            //    UserId = userId.Value,
+            //    UserEmail = email,
+            //    UserName = name,
+            //    ReasonForUse = reason
+            //};
+            var record = new RegistrationInfo
+            {
+                DatasetId=datasetId.ToString(),
+                Ip=info.Ip,
+                UserEmail=email,
+                FirstName=info.FirstName,
+                LastName=info.LastName,
+                SchoolOrg=info.SchoolOrg,
+                OrganizationType=info.OrganizationType,
+                Department=info.Department,
+                RoleTitle=info.RoleTitle,
+                EmailAddress=info.EmailAddress,
+                PhoneNumber=info.PhoneNumber,
+                PhysicalAddress=info.PhysicalAddress,
+                AddressLine2=info.AddressLine2,
+                City=info.City,
+                State=info.State,
+                Zip=info.Zip,
+                Country=info.Country,
+                AgreementOfTerms=info.AgreementOfTerms,
+                UserID= userId.Value.ToString(),
+                UserName= name
+            };
+            //await this.Client.UpsertDocumentAsync(uri, record, options).ConfigureAwait(false);
+
+
+
+            var response = await this.Client.UpsertDocumentAsync(uri, record, options).ConfigureAwait(false);
+            var document = response.Resource;
+            string registrationId = document.GetPropertyValue<string>("id");
+
+            var optionsFeed = new FeedOptions
+            {
+                PartitionKey = new PartitionKey("ri00bbb6-aaa7-4f78-a0bf-1d0f6759e674")
+            };
+
+            var options2 = new RequestOptions
+            {
+                PartitionKey = new PartitionKey("ri00bbb6-aaa7-4f78-a0bf-1d0f6759e674")
+            };
+
+            var query = this.Client.CreateDocumentQuery<LastRegistration>(UriFactory.CreateDocumentCollectionUri("OpenData", "UserData"), optionsFeed)
+                    .Where(f => f.UserId == userId.Value.ToString())
+                    .AsDocumentQuery();
+
+            var documents = await query.ExecuteNextAsync<LastRegistration>(cancellationToken)
+                .ConfigureAwait(false);
+
+            var documentTemp = documents.FirstOrDefault();
+            if (documentTemp != null)
+            {
+                await this.Client.UpsertDocumentAsync(
+                UriFactory.CreateDocumentCollectionUri("OpenData", "UserData"), new
+                {
+                    id= documentTemp.Id,
+                    RegistrationId = registrationId,
+                    fordataset = datasetId.ToString(),
+                    userId = userId.Value.ToString(),
+                    datasetId = "ri00bbb6-aaa7-4f78-a0bf-1d0f6759e674"
+                }
+                , options2).ConfigureAwait(false);
+            }
+            else { 
+                await this.Client.UpsertDocumentAsync(
+                    UriFactory.CreateDocumentCollectionUri("OpenData", "UserData"), new
+                    {
+                        RegistrationId = registrationId,
+                        fordataset = datasetId.ToString(),
+                        userId = userId.Value.ToString(),
+                        datasetId = "ri00bbb6-aaa7-4f78-a0bf-1d0f6759e674"
+                    }
+                    , options2).ConfigureAwait(false);
+            }
+            //var options2 = new RequestOptions
+            //{
+            //    PartitionKey = new PartitionKey(WellKnownIds.RegistrationInfoLastFilledPartitionKey.ToString())
+            //};
+
+            //var lastInfo = new LastFilledRegistration
+            //{
+            //    RegistrationId = registrationId,
+            //    DatasetId = datasetId.ToString(),
+            //    userId = userId.Value.ToString(),
+            //    PartKey = WellKnownIds.RegistrationInfoLastFilledPartitionKey.ToString()
+            //};
+
+            //await this.Client.UpsertDocumentAsync(
+            //    UriFactory.CreateDocumentCollectionUri("OpenData", "UserData"),
+            //    lastInfo, options2).ConfigureAwait(false);
+
+            return doc.LicenseId;
+        }
+
         public async Task<Guid?> CreateDatasetNominationAsync(ClaimsPrincipal user, DatasetNomination nomination,
             CancellationToken cancellationToken)
         {
@@ -208,9 +407,15 @@ namespace Msr.Odr.Services
                 d.DatasetId = WellKnownIds.DatasetNominationDatasetId;
             });
 
+            record.AccountName = null;
+            record.ContainerName = null;
+            record.BlobName = null;
+
             await this.Client.CreateDocumentAsync(UserDataDocumentCollectionUri, record).ConfigureAwait(false);
             return record.Id;
         }
+
+
 
         public async Task<Guid?> UpdateDatasetNominationAsync(ClaimsPrincipal user, DatasetNomination nomination, CancellationToken cancellationToken)
         {
@@ -362,20 +567,25 @@ namespace Msr.Odr.Services
             document.SetPropertyValue("modifiedByUserName", name);
             document.SetPropertyValue("modifiedByUserEmail", email);
             document.SetPropertyValue("nominationStatus", status.ToString());
+            document.SetPropertyValue("accountName", storage.AccountName);
+            document.SetPropertyValue("containerName", storage.ContainerName);
+
             await Client.ReplaceDocumentAsync(document.SelfLink, document);
 
-            var datasetRecordLink = new Attachment
-            {
-                Id = "Content",  // "Slug" is ID with hard-attach
-                ContentType = "x-azure-blockstorage",
-                MediaLink = containerUri,
-            };
+            //var datasetRecordLink = new Attachment
+            //{
+            //    Id = "Content",  // "Slug" is ID with hard-attach
+            //    ContentType = "x-azure-blockstorage",
+            //    MediaLink = containerUri,
+            //};
 
-            datasetRecordLink.SetPropertyValue("storageType", "blob");
-            datasetRecordLink.SetPropertyValue("container", storage.ContainerName);
-            datasetRecordLink.SetPropertyValue("account", storage.AccountName);
+            //datasetRecordLink.SetPropertyValue("storageType", "blob");
+            //datasetRecordLink.SetPropertyValue("container", storage.ContainerName);
+            //datasetRecordLink.SetPropertyValue("account", storage.AccountName);
 
-            await Client.UpsertAttachmentAsync(document.SelfLink, datasetRecordLink, options);
+            //await Client.UpsertAttachmentAsync(document.SelfLink, datasetRecordLink, options);
+
+            //
 
             return status;
         }
@@ -400,20 +610,50 @@ namespace Msr.Odr.Services
                 return null;
             }
 
-            var contentLink = CreateUserDataDocumentAttachmentUri(id, "Content");
-            var options = new RequestOptions
-            {
-                PartitionKey = new PartitionKey(WellKnownIds.DatasetNominationDatasetId.ToString())
-            };
-            var response = await Client.ReadAttachmentAsync(contentLink.ToString(), options).ConfigureAwait(false);
-            var resource = response?.Resource;
-            if (resource == null)
+            //var contentLink = CreateUserDataDocumentAttachmentUri(id, "Content");
+            //var options = new RequestOptions
+            //{
+            //    PartitionKey = new PartitionKey(WellKnownIds.DatasetNominationDatasetId.ToString())
+            //};
+
+            var Response = await Client.ReadDocumentAsync(
+                    UriFactory.CreateDocumentUri("OpenData","UserData", Convert.ToString(id)),
+                    new RequestOptions
+                    {
+                        PartitionKey = new PartitionKey(WellKnownIds.DatasetNominationDatasetId.ToString())
+                    });
+            var Document = Response.Resource;
+            DatasetNomination Info = new DatasetNomination();
+            Info.AccountName = Document.GetPropertyValue<string>("accountName");
+            Info.ContainerName = Document.GetPropertyValue<string>("containerName");
+
+            //FetchDocumentService fetchDocumentService = new FetchDocumentService();
+            //var doc = await fetchDocumentService.GetNominationsAccountAndContainerName(
+            //    Convert.ToString(id),WellKnownIds.DatasetNominationDatasetId.ToString());
+            if (Info == null)
             {
                 return null;
             }
+            var accountName = Info.AccountName;
+            var containerName = Info.ContainerName;
+            if (accountName == null)
+            {
+                accountName = "null";
+            }
+            if (containerName == null)
+            {
+                containerName = "null";
+            }
 
-            var accountName = resource.GetPropertyValue<string>("account");
-            var containerName = resource.GetPropertyValue<string>("container");
+            //var response = await Client.ReadAttachmentAsync(contentLink.ToString(), options).ConfigureAwait(false);
+            //var resource = response?.Resource;
+            //if (resource == null)
+            //{
+            //    return null;
+            //}
+
+            //var accountName = resource.GetPropertyValue<string>("account");
+            //var containerName = resource.GetPropertyValue<string>("container");
             var accessToken = await SasTokens.GenerateSasTokenForUpdatingDatasetContainer(accountName, containerName);
 
             return new DatasetImportProperties

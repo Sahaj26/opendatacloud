@@ -277,15 +277,34 @@ namespace Msr.Odr.Services
             try
             {
                 var documentLink = this.CreateDatasetDocumentAttachmentUri(id, "Content");
-                var response = await this.Client.ReadAttachmentAsync(documentLink, options).ConfigureAwait(false);
-                var resource = response?.Resource;
-                if (resource != null)
+
+                //FetchDocumentService fetchDocumentService = new FetchDocumentService();
+                //var doc = await fetchDocumentService.GetNominationsAccountAndContainerName(
+                //    id.ToString(),
+                //    WellKnownIds.DatasetNominationDatasetId.ToString()
+                //    );
+                var Response = await Client.ReadDocumentAsync(
+                    UriFactory.CreateDocumentUri("OpenData", "UserData", id.ToString()),
+                    new RequestOptions
+                    {
+                        PartitionKey = new PartitionKey(WellKnownIds.DatasetNominationDatasetId.ToString())
+                    });
+                var Document = Response.Resource;
+                DatasetNomination Info = new DatasetNomination();
+                Info.AccountName = Document.GetPropertyValue<string>("accountName");
+                Info.ContainerName = Document.GetPropertyValue<string>("containerName");
+
+                var doc = Info;
+
+                //var response = await this.Client.ReadAttachmentAsync(documentLink, options).ConfigureAwait(false);
+                //var resource = response?.Resource;
+                if (doc != null)
                 {
-                    var storageType = resource?.GetPropertyValue<string>("storageType");
+                    var storageType = "blob";//resource?.GetPropertyValue<string>("storageType");
                     if (storageType == "blob")
                     {
-                        var account = resource?.GetPropertyValue<string>("account");
-                        var container = resource?.GetPropertyValue<string>("container");
+                        var account = doc.AccountName;//resource?.GetPropertyValue<string>("account");
+                        var container = doc.ContainerName;//resource?.GetPropertyValue<string>("container");
 
                         return this.SasTokens.CreateContainerSasToken(account, container);
                     }
@@ -306,31 +325,63 @@ namespace Msr.Odr.Services
         public async Task<DatasetStorageDetails> GetDatasetStorageDetails(Guid datasetId, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var options = new RequestOptions
-            {
-                PartitionKey = new PartitionKey(datasetId.ToString())
-            };
+            //var options = new RequestOptions
+            //{
+            //    PartitionKey = new PartitionKey(datasetId.ToString())
+            //};
 
-            var documentLink = CreateDatasetDocumentAttachmentUri(datasetId, "Content");
-            var response = await Client.ReadAttachmentAsync(documentLink, options).ConfigureAwait(false);
-            var resource = response?.Resource;
-            if (resource == null)
-            {
-                return null;
-            }
+            //var documentLink = CreateDatasetDocumentAttachmentUri(datasetId, "Content");
+            //var response = await Client.ReadAttachmentAsync(documentLink, options).ConfigureAwait(false);
+            //var resource = response?.Resource;
+            //if (resource == null)
+            //{
+            //    return null;
+            //}
 
+            //FetchDocumentService fetchDocumentService = new FetchDocumentService();
+            //DatasetNomination response = await fetchDocumentService.GetNominationsAccountAndContainerName(
+            //    datasetId.ToString(),
+            //    WellKnownIds.DatasetNominationDatasetId.ToString()
+            //    );
+
+            var Response = await Client.ReadDocumentAsync(
+                    UriFactory.CreateDocumentUri("OpenData", "UserData", datasetId.ToString()),
+                    new RequestOptions
+                    {
+                        PartitionKey = new PartitionKey(WellKnownIds.DatasetNominationDatasetId.ToString())
+                    });
+            var Document = Response.Resource;
+            DatasetNomination Info = new DatasetNomination();
+            Info.AccountName = Document.GetPropertyValue<string>("accountName");
+            Info.ContainerName = Document.GetPropertyValue<string>("containerName");
+
+            var response = Info;
+
+            string accountName = response.AccountName;
+            string containerName = response.ContainerName;
+
+            //var storageType = resource.GetPropertyValue<string>("storageType") ?? string.Empty;
+            var storageType = "blob";
             DatasetStorageDetails details = null;
-            var storageType = resource.GetPropertyValue<string>("storageType") ?? string.Empty;
             switch (storageType)
             {
                 case "blob":
-                    details = new DatasetBlobStorageDetails
+
+                    DatasetStorageDetails temp = new DatasetBlobStorageDetails()
                     {
                         DatasetId = datasetId,
                         StorageType = DatasetStorageTypes.Blob,
-                        Account = resource.GetPropertyValue<string>("account"),
-                        Container = resource.GetPropertyValue<string>("container"),
+                        Account = accountName,
+                        Container = containerName
                     };
+                    details = temp;
+                    //details=new DatasetBlobStorageDetails
+                    //{
+                    //    DatasetId = datasetId,
+                    //    StorageType = DatasetStorageTypes.Blob,
+                    //    Account = resource.GetPropertyValue<string>("account"),
+                    //    Container = resource.GetPropertyValue<string>("container"),
+                    //};
                     break;
                 default:
                     throw new InvalidOperationException($"Unknown storage type, \"{storageType}\", for dataset.");
@@ -575,7 +626,7 @@ namespace Msr.Odr.Services
             return documentCount;
         }
 
-        public async Task CreateFileRecord(FileSystemItem fileItem, FileSystemItemBlobDetails blob = null)
+        public async Task CreateFileRecord(FileSystemItem fileItem, Guid NominationId, FileSystemItemBlobDetails blob = null)
         {
             var options = new RequestOptions
             {
@@ -585,19 +636,34 @@ namespace Msr.Odr.Services
 
             if (blob != null)
             {
-                var link = new Attachment
+                //var link = new Attachment
+                //{
+                //    Id = blob.Name,  // "Slug" is ID with hard-attach
+                //    ContentType = blob.ContentType,
+                //    MediaLink = blob.Uri,
+                //};
+
+                //link.SetPropertyValue("storageType", "blob");
+                //link.SetPropertyValue("container", blob.Container);
+                //link.SetPropertyValue("account", blob.Account);
+                //link.SetPropertyValue("blob", blob.Name);
+
+                //await Client.UpsertAttachmentAsync(fileRecord.Resource.SelfLink, link, options).ConfigureAwait(false);
+
+                var docUri = CreateUserDataDocumentUri(NominationId);
+                var optionsNominations = new RequestOptions
                 {
-                    Id = blob.Name,  // "Slug" is ID with hard-attach
-                    ContentType = blob.ContentType,
-                    MediaLink = blob.Uri,
+                    PartitionKey = new PartitionKey(WellKnownIds.DatasetNominationDatasetId.ToString())
                 };
 
-                link.SetPropertyValue("storageType", "blob");
-                link.SetPropertyValue("container", blob.Container);
-                link.SetPropertyValue("account", blob.Account);
-                link.SetPropertyValue("blob", blob.Name);
+                Microsoft.Azure.Documents.Document document = await Client.ReadDocumentAsync(docUri, optionsNominations);
+                if (document != null)
+                {
+                    document.SetPropertyValue("blobName", blob.Name);
+                }
 
-                await Client.UpsertAttachmentAsync(fileRecord.Resource.SelfLink, link, options).ConfigureAwait(false);
+                await Client.ReplaceDocumentAsync(document.SelfLink, document);
+
             }
         }
 
@@ -623,20 +689,25 @@ namespace Msr.Odr.Services
             {
                 PartitionKey = new PartitionKey(dataset.Id.ToString())
             };
+
+            datasetItem.AccountName = containerDetails.Account;
+            datasetItem.ContainerName = containerDetails.Container;
+            datasetItem.BlobName = null;
+
             var datasetRecord = await Client.UpsertDocumentAsync(DatasetDocumentCollectionUri, datasetItem, options).ConfigureAwait(false);
 
-            var link = new Attachment
-            {
-                Id = containerDetails.Name,
-                ContentType = containerDetails.ContentType,
-                MediaLink = containerDetails.Uri
-            };
+            //var link = new Attachment
+            //{
+            //    Id = containerDetails.Name,
+            //    ContentType = containerDetails.ContentType,
+            //    MediaLink = containerDetails.Uri
+            //};
 
-            link.SetPropertyValue("storageType", "blob");
-            link.SetPropertyValue("container", containerDetails.Container);
-            link.SetPropertyValue("account", containerDetails.Account);
+            //link.SetPropertyValue("storageType", "blob");
+            //link.SetPropertyValue("container", containerDetails.Container);
+            //link.SetPropertyValue("account", containerDetails.Account);
 
-            await Client.UpsertAttachmentAsync(datasetRecord.Resource.SelfLink, link, options).ConfigureAwait(false);
+            //await Client.UpsertAttachmentAsync(datasetRecord.Resource.SelfLink, link, options).ConfigureAwait(false);
         }
 
         public async Task CreateDatasetStorageDetailsRecord(DatasetItemContainerDetails containerDetails)

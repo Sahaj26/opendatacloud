@@ -3,7 +3,7 @@
 
 <section class="typographic-intro">
     <div class="container">
-        <h1 class="heading">Open Data Platform<span class="badge">Beta</span></h1>
+        <h1 class="heading">Stanford AIMI Shared Datasets <span class="badge">Beta</span></h1>
 
         <form [formGroup]="form" role="form" class="form-horizontal" (ngSubmit)="onSubmit()" novalidate>
             <div class="form-group form-group-lg">
@@ -24,9 +24,8 @@
             </div>
         </form>
 
-        <p class="subheading">A collection of free datasets from Microsoft Research to advance state-of-the-art research
-            in areas such as natural language processing, computer vision, and domain specific sciences. Download or
-            copy directly to a cloud-based Data Science Virtual Machine for a seamless development experience. </p>
+        <!-- <p class="subheading">A collection of de-identified annotated medical imaging data across multiple organizations to foster transparent and reproducible collaborative research.</p> -->
+        <p class="subheading">o	A collection of de-identified annotated medical imaging data to foster transparent and reproducible collaborative research.  The Stanford AIMI Center was established to develop, evaluate, and disseminate artificial intelligence systems to benefit patients.  Find out more by visiting <a style="color: white;" href="https://aimi.stanford.edu" target="_blank">the AIMI website</a>.</p>
     </div>
 </section>
 
@@ -35,15 +34,17 @@
         <h2 class="heading">Dataset Categories</h2>
     </header>
 
+    <!-- <app-categories></app-categories> -->
+
     <div class="layout-twocol comfy spacing-top-sm">
         <div>
             <div class="category">
                 <div>
-                    <img src="/assets/icons/computerscience.svg" class="icon" height="80" width="80" />
+                    <img src="/assets/icons/body.svg" class="icon" height="80" width="80" />
                 </div>
                 <div>
-                    <h3 class="subheading">Computer Science</h3>
-                    <a [routerLink]="" (click)="loadCategory('Computer Science')" aria-label="View dataset"
+                    <h3 class="subheading">BODY</h3>
+                    <a [routerLink]="" (click)="loadCategory('Body')" aria-label="View dataset"
                         class="call-to-action">
                         <span>VIEW DATASETS</span>
                     </a>
@@ -53,11 +54,11 @@
         <div>
             <div class="category">
                 <div>
-                    <img src="/assets/icons/socialscience.svg" class="icon" />
+                    <img src="/assets/icons/bone.svg" class="icon" />
                 </div>
                 <div>
-                    <h3 class="subheading">Social Science</h3>
-                    <a [routerLink]="" (click)="loadCategory('Social Science')" aria-label="View dataset"
+                    <h3 class="subheading">BONE</h3>
+                    <a [routerLink]="" (click)="loadCategory('Bone')" aria-label="View dataset"
                         class="call-to-action">
                         <span>VIEW DATASETS</span>
                     </a>
@@ -67,11 +68,11 @@
         <div>
             <div class="category">
                 <div>
-                    <img src="/assets/icons/physics.svg" class="icon" />
+                    <img src="/assets/icons/extremity.svg" class="icon" />
                 </div>
                 <div>
-                    <h3 class="subheading">Physics</h3>
-                    <a [routerLink]="" (click)="loadCategory('Physics')" aria-label="View dataset"
+                    <h3 class="subheading">EXTREMITY</h3>
+                    <a [routerLink]="" (click)="loadCategory('Extremity')" aria-label="View dataset"
                         class="call-to-action">
                         <span>VIEW DATASETS</span>
                     </a>
@@ -81,11 +82,11 @@
         <div>
             <div class="category">
                 <div>
-                    <img src="/assets/icons/informationscience.svg" class="icon" />
+                    <img src="/assets/icons/breast.svg" class="icon" />
                 </div>
                 <div>
-                    <h3 class="subheading">Information Science</h3>
-                    <a [routerLink]="" (click)="loadCategory('Information Science')" aria-label="View dataset"
+                    <h3 class="subheading">BREAST</h3>
+                    <a [routerLink]="" (click)="loadCategory('Breast')" aria-label="View dataset"
                         class="call-to-action">
                         <span>VIEW DATASETS</span>
                     </a>

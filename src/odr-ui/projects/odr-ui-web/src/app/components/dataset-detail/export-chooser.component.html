@@ -17,7 +17,7 @@
     </div>
 </div>
 
-<div class="button-list" *ngIf="isAuthenticated">
+<div class="button-list" *ngIf="isAuthenticated" data-toggle="modal" data-target="#exampleModal">
     <app-download-button (click)="downloadDataset()"
                          buttonText="Download" [size]="dataset.size"></app-download-button>
     <app-download-button (click)="downloadZipFile()" *ngIf="isCompressedAvailable"
@@ -67,3 +67,6 @@
     </div>
 
 </div>
+
+<br>
+<br>

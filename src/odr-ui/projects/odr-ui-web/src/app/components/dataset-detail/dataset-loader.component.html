@@ -13,8 +13,11 @@
     </div>
 
     <div *ngIf="datasetDetails | async; let details">
-        <app-dataset-detail [isAuthenticated]="details.isAuthenticated" [acceptedLicense]="details.acceptedLicense"
-            [dataset]="details.dataset" (onUserAcceptedLicense)="userDidAcceptLicense($event)"></app-dataset-detail>
+        <app-dataset-detail [isAuthenticated]="details.isAuthenticated" [acceptedLicense]="isRegistered"
+            [ip]="ip" [city]="city" [state]="state" [country]="country" [dataset]="details.dataset"
+            [oldRegistrationInfo]="oldInfo"
+            (onUserAcceptedLicense)="userDidAcceptLicense($event)">
+        </app-dataset-detail>
     </div>
 
 </div>
