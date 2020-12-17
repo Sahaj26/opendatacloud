@@ -219,15 +219,15 @@ namespace Msr.Odr.Services
         private async Task UpdateDatsetDocFromEditDoc(DatasetEditStorageItem dataset, CancellationToken token)
         {
             // Create the license document (if applicable)
-            if (dataset.NominationLicenseType == NominationLicenseType.HtmlText || dataset.NominationLicenseType == NominationLicenseType.InputFile)
-            {
-                var license = await DatasetStorage.CreateLicense(dataset);
-                if (license != null)
-                {
-                    dataset.LicenseId = license.Id;
-                    dataset.License = license.Name;
-                }
-            }
+            //if (dataset.NominationLicenseType == NominationLicenseType.HtmlText || dataset.NominationLicenseType == NominationLicenseType.InputFile)
+            //{
+            //    var license = await DatasetStorage.CreateLicense(dataset);
+            //    if (license != null)
+            //    {
+            //        dataset.LicenseId = license.Id;
+            //        dataset.License = license.Name;
+            //    }
+            //}
 
             // Update the dataset record
             var docUri = CreateDatasetDocumentUri(dataset.Id);
@@ -250,6 +250,7 @@ namespace Msr.Odr.Services
             current.Tags = dataset.Tags;
             current.DigitalObjectIdentifier = dataset.DigitalObjectIdentifier;
             current.IsDownloadAllowed = dataset.IsDownloadAllowed;
+            current.Modified = DateTime.UtcNow;
             await Client.ReplaceDocumentAsync(docUri, current, reqOpts);
 
             // Delete the original dataset edit record
@@ -295,7 +296,7 @@ namespace Msr.Odr.Services
                 Version = dataset.Version,
                 Published = dataset.Published,
                 Created = dataset.Created,
-                Modified = dataset.Modified,
+                Modified = DateTime.UtcNow, //dataset.Modified,
                 License = dataset.License,
                 LicenseId = dataset.LicenseId,
                 Tags = (dataset.Tags ?? Enumerable.Empty<string>()).ToList(),
@@ -315,7 +316,10 @@ namespace Msr.Odr.Services
                 OtherLicenseFileContentType = dataset.OtherLicenseFileContentType,
                 OtherLicenseAdditionalInfoUrl = dataset.OtherLicenseAdditionalInfoUrl,
                 OtherLicenseName = dataset.OtherLicenseName,
-                OtherLicenseFileName = dataset.OtherLicenseFileName
+                OtherLicenseFileName = dataset.OtherLicenseFileName,
+                AccountName= dataset.ContentEditAccount,
+                ContainerName= dataset.ContentEditContainer,
+                
             };
             await Client.UpsertDocumentAsync(
                 UserDataDocumentCollectionUri,
@@ -328,25 +332,25 @@ namespace Msr.Odr.Services
                 token);
 
             // Point nomination document to updated container
-            var datasetRecordLink = new Attachment
-            {
-                Id = "Content",
-                ContentType = "x-azure-blockstorage",
-                MediaLink = SasTokens.GetContainerMediaLink(
-                    dataset.ContentEditAccount,
-                    dataset.ContentEditContainer)
-            };
-            datasetRecordLink.SetPropertyValue("storageType", "blob");
-            datasetRecordLink.SetPropertyValue("container", dataset.ContentEditContainer);
-            datasetRecordLink.SetPropertyValue("account", dataset.ContentEditAccount);
-            await Client.UpsertAttachmentAsync(
-                UserDataDocumentUriById(dataset.Id.ToString()),
-                datasetRecordLink,
-                new RequestOptions
-                {
-                    PartitionKey = new PartitionKey(WellKnownIds.DatasetNominationDatasetId.ToString())
-                },
-                token);
+            //var datasetRecordLink = new Attachment
+            //{
+            //    Id = "Content",
+            //    ContentType = "x-azure-blockstorage",
+            //    MediaLink = SasTokens.GetContainerMediaLink(
+            //        dataset.ContentEditAccount,
+            //        dataset.ContentEditContainer)
+            //};
+            //datasetRecordLink.SetPropertyValue("storageType", "blob");
+            //datasetRecordLink.SetPropertyValue("container", dataset.ContentEditContainer);
+            //datasetRecordLink.SetPropertyValue("account", dataset.ContentEditAccount);
+            //await Client.UpsertAttachmentAsync(
+            //    UserDataDocumentUriById(dataset.Id.ToString()),
+            //    datasetRecordLink,
+            //    new RequestOptions
+            //    {
+            //        PartitionKey = new PartitionKey(WellKnownIds.DatasetNominationDatasetId.ToString())
+            //    },
+            //    token);
         }
 
         public async Task<bool> CleanUpDatasetEditAfterImport(Guid datasetId)
