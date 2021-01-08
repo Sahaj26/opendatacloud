@@ -25,6 +25,7 @@ using Msr.Odr.Model.UserData;
 using Msr.Odr.Services.Configuration;
 using Newtonsoft.Json.Linq;
 using Microsoft.Azure.Storage.Blob;
+using Msr.Odr.Services.Constants;
 
 namespace Msr.Odr.Services
 {
@@ -141,7 +142,7 @@ namespace Msr.Odr.Services
                     PartitionKey = new PartitionKey("ri00bbb6-aaa7-4f78-a0bf-1d0f6759e674")
                 };
 
-                var query1 = this.Client.CreateDocumentQuery<LastRegistration>(UriFactory.CreateDocumentCollectionUri("OpenData", "UserData"), optionsFeed)
+                var query1 = this.Client.CreateDocumentQuery<LastRegistration>(UriFactory.CreateDocumentCollectionUri(PathsAndValues.CosmosAccountNameOpenData, PathsAndValues.CosmosCollectionNameUserData), optionsFeed)
                         .Where(f => f.UserId == userId.Value.ToString())
                         .AsDocumentQuery();
 
@@ -157,7 +158,7 @@ namespace Msr.Odr.Services
                     };
 
                     var query = this.Client.CreateDocumentQuery<RegistrationInfo>(
-                        UriFactory.CreateDocumentCollectionUri("OpenData", "UserData"), options)
+                        UriFactory.CreateDocumentCollectionUri(PathsAndValues.CosmosAccountNameOpenData,PathsAndValues.CosmosCollectionNameUserData), options)
                                             .Where(f => f.Id == documentTemp.RegistrationId)
                                             .AsDocumentQuery();
 
@@ -334,7 +335,7 @@ namespace Msr.Odr.Services
                 PartitionKey = new PartitionKey("ri00bbb6-aaa7-4f78-a0bf-1d0f6759e674")
             };
 
-            var query = this.Client.CreateDocumentQuery<LastRegistration>(UriFactory.CreateDocumentCollectionUri("OpenData", "UserData"), optionsFeed)
+            var query = this.Client.CreateDocumentQuery<LastRegistration>(UriFactory.CreateDocumentCollectionUri(PathsAndValues.CosmosAccountNameOpenData, PathsAndValues.CosmosCollectionNameUserData), optionsFeed)
                     .Where(f => f.UserId == userId.Value.ToString())
                     .AsDocumentQuery();
 
@@ -345,7 +346,7 @@ namespace Msr.Odr.Services
             if (documentTemp != null)
             {
                 await this.Client.UpsertDocumentAsync(
-                UriFactory.CreateDocumentCollectionUri("OpenData", "UserData"), new
+                UriFactory.CreateDocumentCollectionUri(PathsAndValues.CosmosAccountNameOpenData, PathsAndValues.CosmosCollectionNameUserData), new
                 {
                     id= documentTemp.Id,
                     RegistrationId = registrationId,
@@ -357,7 +358,7 @@ namespace Msr.Odr.Services
             }
             else { 
                 await this.Client.UpsertDocumentAsync(
-                    UriFactory.CreateDocumentCollectionUri("OpenData", "UserData"), new
+                    UriFactory.CreateDocumentCollectionUri(PathsAndValues.CosmosAccountNameOpenData, PathsAndValues.CosmosCollectionNameUserData), new
                     {
                         RegistrationId = registrationId,
                         fordataset = datasetId.ToString(),
@@ -617,7 +618,7 @@ namespace Msr.Odr.Services
             //};
 
             var Response = await Client.ReadDocumentAsync(
-                    UriFactory.CreateDocumentUri("OpenData","UserData", Convert.ToString(id)),
+                    UriFactory.CreateDocumentUri(PathsAndValues.CosmosAccountNameOpenData, PathsAndValues.CosmosCollectionNameUserData, Convert.ToString(id)),
                     new RequestOptions
                     {
                         PartitionKey = new PartitionKey(WellKnownIds.DatasetNominationDatasetId.ToString())

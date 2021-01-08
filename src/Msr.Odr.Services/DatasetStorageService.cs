@@ -26,6 +26,7 @@ using Msr.Odr.Model.UserData;
 using Msr.Odr.Services.Configuration;
 using Msr.Odr.Services.Mappers;
 using Microsoft.Azure.Storage.Blob;
+using Msr.Odr.Services.Constants;
 
 namespace Msr.Odr.Services
 {
@@ -284,7 +285,7 @@ namespace Msr.Odr.Services
                 //    WellKnownIds.DatasetNominationDatasetId.ToString()
                 //    );
                 var Response = await Client.ReadDocumentAsync(
-                    UriFactory.CreateDocumentUri("OpenData", "UserData", id.ToString()),
+                    UriFactory.CreateDocumentUri(PathsAndValues.CosmosAccountNameOpenData, PathsAndValues.CosmosCollectionNameUserData, id.ToString()),
                     new RequestOptions
                     {
                         PartitionKey = new PartitionKey(WellKnownIds.DatasetNominationDatasetId.ToString())
@@ -345,7 +346,7 @@ namespace Msr.Odr.Services
             //    );
 
             var Response = await Client.ReadDocumentAsync(
-                    UriFactory.CreateDocumentUri("OpenData", "UserData", datasetId.ToString()),
+                    UriFactory.CreateDocumentUri(PathsAndValues.CosmosAccountNameOpenData,PathsAndValues.CosmosCollectionNameUserData, datasetId.ToString()),
                     new RequestOptions
                     {
                         PartitionKey = new PartitionKey(WellKnownIds.DatasetNominationDatasetId.ToString())
